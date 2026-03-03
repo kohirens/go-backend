@@ -1,0 +1,37 @@
+services:
+    backend:
+        build:
+            args:
+                USER_NAME: ${USER_NAME}
+                REPO: ${REPO}
+            dockerfile: .config/docker/devenv/Dockerfile
+            context: ../..
+            target: dev
+            additional_contexts:
+              - stdlib=../../../stdlib
+        develop:
+            watch:
+                - action: rebuild
+                  path: ../..
+                  target: /home/${USER_NAME}/src/${REPO}
+        environment:
+            VERBOSITY_LEVEL: 6
+            AWS_PROFILE: iac-testing
+        image: kohirens/www
+        networks:
+            ds: {}
+        tty: true
+        volumes:
+            - ../../:/home/${USER_NAME}/src/${REPO}
+            - ~/.ssh/known_hosts:/home/${USER_NAME}/.ssh/known_hosts
+            - ./devenv/.ash_history:/home/${USER_NAME}/.ash_history
+            - vscode:/home/${USER_NAME}/.vscode-server
+            - ~/.aws/:/home/${USER_NAME}/.aws/
+            - go_mod_cache:/home/${USER_NAME}/pkg/mod
+
+volumes:
+    vscode: null
+    go_mod_cache: null
+networks:
+    ds: # ds = dualstack
+        enable_ipv6: true

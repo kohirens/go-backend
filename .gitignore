@@ -1,0 +1,11 @@
+# Directories
+# -----------
+/.idea/
+/tmp/
+
+# Files
+# -----
+.ash_history
+/build-version.json
+go.work
+go.work.sum
