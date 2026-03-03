@@ -165,32 +165,7 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Find the route to respond to the request.
 	fn := a.router.Find(rawPath)
 
-	e2 := fn(w, r, a)
-	if e2 != nil {
-		switch e := e2.(type) {
-		case *ReferralError:
-			if e.Location != "" {
-				w.Header().Set("Location", e.Location)
-			}
-			if e.Body != nil {
-				_, eX := w.Write(e.Body)
-				if eX != nil {
-					Log.Errf(stderr.WriteResponse, eX.Error())
-				}
-			}
-			w.Header().Set("Content-Type", e.ContentType)
-			w.WriteHeader(e.Code)
-
-			if e.Log {
-				Log.Errf("%v", e.Error())
-			}
-		default:
-			Log.Errf("%v", e2.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-
-		return
-	}
+	fn(w, r)
 
 	Log.Infof("%v", stdout.PageDone)
 
@@ -233,12 +208,7 @@ func (a *Api) ServeLambda(event *awslambda.Input) (*awslambda.Output, error) {
 	}
 
 	fn := a.router.Find(rawPath)
-	if e := fn(w, r, a); e != nil {
-		Log.Errf("%v", e.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return w, nil
-
-	}
+	fn(w, r)
 
 	Log.Infof("done loading page")
 

@@ -6,7 +6,7 @@ import (
 )
 
 // Route Is a function similar to http.HandleFunc, but returns an error.
-type Route func(http.ResponseWriter, *http.Request, App) error
+type Route func(http.ResponseWriter, *http.Request)
 
 // Router Manages looking up a handler function (in the routes map) to respond
 // to an HTTP request.
@@ -28,10 +28,9 @@ type RouteManager interface {
 func NewRouteManager() RouteManager {
 	return &Router{
 		routes: make(map[string]Route),
-		notFoundHandler: func(w http.ResponseWriter, r *http.Request, _ App) error {
+		notFoundHandler: func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 			_, _ = w.Write([]byte("Not Found"))
-			return nil
 		},
 	}
 }
