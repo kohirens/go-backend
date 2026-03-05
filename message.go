@@ -62,6 +62,7 @@ var stdout = struct {
 	RestoreSession,
 	SaveStorage,
 	SessionTime,
+	Started,
 	TemplateLoad string
 }{
 	CurrentVersion: "%v, %v",
@@ -73,5 +74,6 @@ var stdout = struct {
 	RestoreSession: "attempting to restore previous session ID %v",
 	SaveStorage:    "save storage %v",
 	SessionTime:    "session time: %v",
+	Started:        "handler started",
 	TemplateLoad:   "loaded template: %v",
 }

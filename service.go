@@ -4,7 +4,7 @@ import "fmt"
 
 func NewServiceManager() ServiceManager {
 	return &Servicer{
-		services: make(map[string]interface{}),
+		services: make(map[string]any),
 	}
 }
 
@@ -12,8 +12,8 @@ func NewServiceManager() ServiceManager {
 // handler function is called. Granting access to objects such as Session,
 // Database, and what ever else may be useful.
 type ServiceManager interface {
-	Add(name string, service interface{})
-	Get(name string) (interface{}, error)
+	Add(name string, service any)
+	Get(name string) (any, error)
 }
 
 // Servicer A default service manager provided by the backend package.

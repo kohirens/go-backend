@@ -45,17 +45,14 @@ func main() {
 
 	// Initialize the backend API.
 	app := backend.NewWithDefaults("webapp", store)
-	
 	// Add all the routes you want.
-	loadRoutes(app, &Responder{})
+	loadRoutes(app)
 
 	mainErr = http.ListenAndServeTLS(":443", certFile, certKey, app)
 }
 
-
-type Responder struct {}
 // Health check response.
-func (s *Responder) Health(w http.ResponseWriter, r *http.Request) {
+func Health(w http.ResponseWriter, _ *http.Request,_ backend.App) {
 	if _, e := w.Write([]byte("OK")); e != nil {
 		log.Errf("internal error %v", e.Error())
 	}
@@ -64,7 +61,21 @@ func (s *Responder) Health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func loadRoutes(app backend.App, responder *Responder) {
-	app.AddRoute("/health", responder.Health)
+// HomePage the index page.
+func HomePage(w http.ResponseWriter, _ *http.Request, app backend.App) {
+    _, e1 := app.TmplManager().RenderFiles(w, map[string]any{}, "layout.html", "index.html")
+	if e1 != nil {
+		backend.HandleError(e1, w)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+}
+
+func loadRoutes(app backend.App) {
+	// This seems like u·ro·bo·ros.
+	app.AddRoute("/health", Health)
+	app.AddRoute("/", HomePage)
 }
 ```

@@ -132,16 +132,44 @@ func (a *Api) TmplManager() TemplateManager {
 
 // ServeHTTP Will be called for every request to this server. There is no need
 // to register individual handlers for each pattern or use confusing middleware
-// logic. Its responsibilities:
+// logic.
+func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	processRequest(w, r, a)
+}
+
+// ServeLambda Provide an HTTP response for an AWS Lambda function. A little
+// extra because the AWS even it not compatible with http.Request, same for its
+// response, which also has special considerations.
+func (a *Api) ServeLambda(event *awslambda.Input) (*awslambda.Output, error) {
+	Log.Infof("%v", stdout.Started)
+
+	if errRes := awslambda.PreliminaryChecks(event); errRes != nil {
+		return errRes, nil
+	}
+
+	w := awslambda.NewResponse()
+
+	r, e1 := awslambda.NewRequest(event)
+	if e1 != nil {
+		Log.Errf("%v", e1.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return w, nil
+	}
+
+	processRequest(w, r, a)
+
+	return w, nil
+}
+
+// processRequest responsibilities:
 //  1. Initialize/Load an HTTP session for client requests.
 //  2. Load logic to process a request and write a response.
 //  3. Save the session before sending an HTTP response.
-func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func processRequest(w http.ResponseWriter, r *http.Request, a *Api) {
 	rawPath := r.URL.Path
 	Log.Infof("request %v %v", r.Method, rawPath)
 
 	idCookie, _ := r.Cookie(session.IDKey)
-
 	if e := a.RestoreSessionData(w, idCookie); e != nil {
 		Log.Errf("%v", e.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -165,60 +193,14 @@ func (a *Api) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Find the route to respond to the request.
 	fn := a.router.Find(rawPath)
 
-	fn(w, r)
+	fn(w, r, a)
 
 	Log.Infof("%v", stdout.PageDone)
 
 	if e := a.SaveSessionData(w, r); e != nil {
 		Log.Errf("%v", e.Error())
 		w.WriteHeader(http.StatusInternalServerError)
-		return
 	}
-}
-
-// ServeLambda Provide an HTTP response for an AWS Lambda function. Same as
-// ServerHTTP but a little extra because the AWS Go library containing
-// *events.LambdaFunctionURLRequest it not interchangeable with Go's
-// http.Request, and *events.LambdaFunctionURLResponse is not compatible with
-// Go's http.Response. They are different patterns that you have to account for.
-func (a *Api) ServeLambda(event *awslambda.Input) (*awslambda.Output, error) {
-	Log.Infof("handler started")
-
-	if errRes := awslambda.PreliminaryChecks(event); errRes != nil {
-		return errRes, nil
-	}
-
-	method := event.RequestContext.HTTP.Method
-	rawPath := event.RawPath
-	w := awslambda.NewResponse()
-
-	r, e1 := awslambda.NewRequest(event)
-	if e1 != nil {
-		Log.Errf("%v", e1.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return w, nil
-	}
-
-	Log.Infof("request %v %v", method, rawPath)
-	idCookie, _ := event.Cookie(session.IDKey)
-	if e := a.RestoreSessionData(w, idCookie); e != nil {
-		Log.Errf("%v", e.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return w, nil
-	}
-
-	fn := a.router.Find(rawPath)
-	fn(w, r)
-
-	Log.Infof("done loading page")
-
-	if e := a.SaveSessionData(w, r); e != nil {
-		Log.Errf("%v", e.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return w, nil
-	}
-
-	return w, nil
 }
 
 func (a *Api) RestoreSessionData(w http.ResponseWriter, idCookie *http.Cookie) error {
@@ -256,8 +238,6 @@ func (a *Api) SaveSessionData(w http.ResponseWriter, r *http.Request) error {
 	if e1 != nil {
 		return e1
 	}
-
-	// TODO set in the cookie which provider the client chose.
 
 	authProvider, e2 := a.authManager.Get(KeyGoogleProvider)
 	if authProvider == nil {

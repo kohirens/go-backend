@@ -7,7 +7,7 @@ import (
 )
 
 func TestRouter_Route(t *testing.T) {
-	fix := func(w http.ResponseWriter, r *http.Request) {}
+	fix := func(w http.ResponseWriter, r *http.Request, a App) {}
 	tests := []struct {
 		name     string
 		handler  Route
@@ -25,7 +25,7 @@ func TestRouter_Route(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			router := &Router{
 				routes:          make(map[string]Route),
-				notFoundHandler: func(w http.ResponseWriter, r *http.Request) {},
+				notFoundHandler: func(w http.ResponseWriter, r *http.Request, a App) {},
 			}
 
 			router.Add(tt.endpoint, tt.handler)

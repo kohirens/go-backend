@@ -46,6 +46,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/kohirens/json-web-token v0.0.0-20251010155233-f326c8352886 h1:wQuWXx9enYURl44BPyniiGozAP/5mcyTuFk1WcT++QI=
+github.com/kohirens/json-web-token v0.0.0-20251010155233-f326c8352886/go.mod h1:iMKPiZgRwpUUseVXHFtHrgEiLBL1H/TOfeATl1a1xNo=
 github.com/kohirens/sso v0.0.0-20260224193101-be9248dd35d6 h1:axKnI3B0RFxRyv7oxlzxvRdIiPxGnzUxzUf0RR3MjU0=
 github.com/kohirens/sso v0.0.0-20260224193101-be9248dd35d6/go.mod h1:QD8IWwhWP4N0BWtcLnC/Em4tn4E0SiYiQO5AgJwm3Ik=
 github.com/kohirens/stdlib v0.0.0-20251219022316-7c7cc7222efd h1:M+uSCRM4pxCaYfcJ9tpjE1tYxpgBxsbfLEg0UMd/pm4=
