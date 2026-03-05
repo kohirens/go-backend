@@ -11,7 +11,7 @@ import (
 type App interface {
 	AddRoute(endpoint string, handler Route)
 	AddService(key string, service interface{})
-	AuthManager() AuthManager
+	ProviderManager() ProviderManager
 	Decrypt(message []byte) ([]byte, error)
 	Encrypt(message []byte) ([]byte, error)
 	LoadGPG()
@@ -54,16 +54,16 @@ func New(
 	router RouteManager,
 	serviceManager ServiceManager,
 	tmpl TemplateManager,
-	authManager AuthManager,
+	authManager ProviderManager,
 	store storage.Storage,
 ) App {
 	return &Api{
-		name:           name,
-		serviceManager: serviceManager,
-		router:         router,
-		tmplManager:    tmpl,
-		authManager:    authManager,
-		storage:        store,
+		name:            name,
+		serviceManager:  serviceManager,
+		router:          router,
+		tmplManager:     tmpl,
+		providerManager: authManager,
+		storage:         store,
 	}
 }
 
@@ -73,7 +73,7 @@ func NewWithDefaults(name string, store storage.Storage) App {
 		NewRouteManager(),
 		NewServiceManager(),
 		NewTemplateManager(store, TmplDir, TmplSuffix),
-		NewAuthManager(),
+		NewProviderManager(),
 		store,
 	)
 }

@@ -10,7 +10,7 @@ import (
 )
 
 func TestAuthLink(t *testing.T) {
-	goodAuth := backend.NewAuthManager()
+	goodAuth := backend.NewProviderManager()
 	goodAuth.Add(backend.KeyGoogleProvider, &MockProvider{
 		ExpectedAuthLink: "good-link",
 	})
@@ -39,7 +39,7 @@ func TestAuthLink(t *testing.T) {
 				},
 			},
 			&MockApp{
-				Authorizer: backend.NewAuthManager(),
+				Authorizer: backend.NewProviderManager(),
 			},
 			true,
 		},
@@ -69,7 +69,7 @@ func TestAuthLink(t *testing.T) {
 }
 
 func TestSignIn(t *testing.T) {
-	goodAuth := backend.NewAuthManager()
+	goodAuth := backend.NewProviderManager()
 	goodAuth.Add(backend.KeyGoogleProvider, &MockProvider{
 		ExpectedAuthLink: "good-link",
 	})
@@ -98,7 +98,7 @@ func TestSignIn(t *testing.T) {
 				},
 			},
 			&MockApp{
-				Authorizer: backend.NewAuthManager(),
+				Authorizer: backend.NewProviderManager(),
 			},
 			true,
 		},
@@ -128,7 +128,7 @@ func TestSignIn(t *testing.T) {
 }
 
 func TestSignOut(t *testing.T) {
-	goodAuth := backend.NewAuthManager()
+	goodAuth := backend.NewProviderManager()
 	goodAuth.Add(backend.KeyGoogleProvider, &MockProvider{
 		ExpectedAuthLink: "good-link",
 	})
@@ -154,7 +154,7 @@ func TestSignOut(t *testing.T) {
 				},
 			},
 			&MockApp{
-				Authorizer: backend.NewAuthManager(),
+				Authorizer: backend.NewProviderManager(),
 			},
 			true,
 		},

@@ -8,7 +8,7 @@ import (
 )
 
 type MockApp struct {
-	Authorizer backend.AuthManager
+	Authorizer backend.ProviderManager
 	name       string
 }
 
@@ -37,7 +37,7 @@ func (m *MockApp) AddService(key string, service interface{}) {
 	panic("implement me")
 }
 
-func (m *MockApp) AuthManager() backend.AuthManager {
+func (m *MockApp) ProviderManager() backend.ProviderManager {
 	return m.Authorizer
 }
 

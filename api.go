@@ -20,35 +20,35 @@ import (
 // these components are replaceable as long as the meet the interface
 // requirements.
 type Api struct {
-	authManager    AuthManager
-	capsule        *gpg.Capsule
-	gpgKey         *appKey
-	name           string
-	router         RouteManager
-	serviceManager ServiceManager
-	storage        storage.Storage
-	tmplManager    TemplateManager
+	providerManager ProviderManager
+	capsule         *gpg.Capsule
+	gpgKey          *appKey
+	name            string
+	router          RouteManager
+	serviceManager  ServiceManager
+	storage         storage.Storage
+	tmplManager     TemplateManager
 }
 
 func (a *Api) AddService(key string, service interface{}) {
 	a.serviceManager.Add(key, service)
 }
 
-// AuthManager Return the authentication manager.
-func (a *Api) AuthManager() AuthManager {
-	return a.authManager
+// ProviderManager Return the authentication manager.
+func (a *Api) ProviderManager() ProviderManager {
+	return a.providerManager
 }
 
-// AddProvider Wrapper method that adds an auth provider to the AuthManager
+// AddProvider Wrapper method that adds an auth provider to the ProviderManager
 // for retrieval during request handling.
 func (a *Api) AddProvider(key string, provider sso.OIDCProvider) {
-	a.authManager.Add(key, provider)
+	a.providerManager.Add(key, provider)
 }
 
-// AuthProvider Retrieve an authentication provider from the authentication
+// Provider Retrieve an authentication provider from the authentication
 // manager.
-func (a *Api) AuthProvider(authProvider string) interface{} {
-	p, e1 := a.authManager.Get(authProvider)
+func (a *Api) Provider(authProvider string) interface{} {
+	p, e1 := a.providerManager.Get(authProvider)
 	if e1 != nil {
 		Log.Errf(stderr.AuthProviderLookup, e1.Error())
 		return nil
@@ -212,7 +212,7 @@ func (a *Api) RestoreSessionData(w http.ResponseWriter, idCookie *http.Cookie) e
 	sm.Load(w, idCookie)
 
 	// TODO pull from the cookie which provider the client chose.
-	gp, e2 := a.authManager.Get(KeyGoogleProvider)
+	gp, e2 := a.providerManager.Get(KeyGoogleProvider)
 	if e2 != nil {
 		return e2
 	}
@@ -239,7 +239,7 @@ func (a *Api) SaveSessionData(w http.ResponseWriter, r *http.Request) error {
 		return e1
 	}
 
-	authProvider, e2 := a.authManager.Get(KeyGoogleProvider)
+	authProvider, e2 := a.providerManager.Get(KeyGoogleProvider)
 	if authProvider == nil {
 		return e2
 	}
