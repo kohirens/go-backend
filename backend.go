@@ -1,28 +1,9 @@
 package backend
 
 import (
-	"net/http"
-
 	"github.com/kohirens/stdlib/logger"
-	"github.com/kohirens/www/awslambda"
 	"github.com/kohirens/www/storage"
 )
-
-type App interface {
-	AddRoute(endpoint string, handler Route)
-	AddService(key string, service interface{})
-	ProviderManager() ProviderManager
-	Decrypt(message []byte) ([]byte, error)
-	Encrypt(message []byte) ([]byte, error)
-	LoadGPG()
-	Name() string
-	RouteNotFound(handler Route)
-	ServeHTTP(w http.ResponseWriter, r *http.Request)
-	ServeLambda(event *awslambda.Input) (*awslambda.Output, error)
-	Service(key string) (interface{}, error)
-	ServiceManager() ServiceManager
-	TmplManager() TemplateManager
-}
 
 const (
 	KeyGoogleProvider = "gp"
@@ -48,35 +29,6 @@ var (
 	TmplDir = "templates"
 )
 
-// New A nNew initialized application instance.
-func New(
-	name string,
-	router RouteManager,
-	serviceManager ServiceManager,
-	tmpl TemplateManager,
-	authManager ProviderManager,
-	store storage.Storage,
-) App {
-	return &Api{
-		name:            name,
-		serviceManager:  serviceManager,
-		router:          router,
-		tmplManager:     tmpl,
-		providerManager: authManager,
-		storage:         store,
-	}
-}
-
-func NewWithDefaults(name string, store storage.Storage) App {
-	return New(
-		name,
-		NewRouteManager(),
-		NewServiceManager(),
-		NewTemplateManager(store, TmplDir, TmplSuffix),
-		NewProviderManager(),
-		store,
-	)
-}
 func NewAccountExec(store storage.Storage) *AccountExec {
 	return &AccountExec{store: store}
 }

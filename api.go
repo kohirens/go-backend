@@ -30,36 +30,30 @@ type Api struct {
 	tmplManager     TemplateManager
 }
 
-func (a *Api) AddService(key string, service interface{}) {
-	a.serviceManager.Add(key, service)
-}
-
-// ProviderManager Return the authentication manager.
-func (a *Api) ProviderManager() ProviderManager {
-	return a.providerManager
-}
-
 // AddProvider Wrapper method that adds an auth provider to the ProviderManager
 // for retrieval during request handling.
 func (a *Api) AddProvider(key string, provider sso.OIDCProvider) {
 	a.providerManager.Add(key, provider)
 }
 
-// Provider Retrieve an authentication provider from the authentication
-// manager.
-func (a *Api) Provider(authProvider string) interface{} {
-	p, e1 := a.providerManager.Get(authProvider)
-	if e1 != nil {
-		Log.Errf(stderr.AuthProviderLookup, e1.Error())
-		return nil
-	}
-	return p
-}
-
 // AddRoute Maps a function to a http.HandlerFunc so that it will respond when
 // the route (a.k.a endpoint) is requested.
 func (a *Api) AddRoute(endpoint string, handler Route) {
 	a.router.Add(endpoint, handler)
+}
+
+func (a *Api) AddService(key string, service interface{}) {
+	a.serviceManager.Add(key, service)
+}
+
+// Decrypt Decode a message using the apps key.
+func (a *Api) Decrypt(message []byte) ([]byte, error) {
+	return a.capsule.Decrypt(message)
+}
+
+// Encrypt cipher a message using the apps key.
+func (a *Api) Encrypt(subject []byte) ([]byte, error) {
+	return a.capsule.Encrypt(subject)
 }
 
 // LoadGPG Pull the GPG key from <storage>/secret/<app-name>
@@ -86,48 +80,30 @@ func (a *Api) LoadGPG() {
 	a.capsule = capsule
 }
 
-// Decrypt Decode a message using the apps key.
-func (a *Api) Decrypt(message []byte) ([]byte, error) {
-	return a.capsule.Decrypt(message)
-}
-
-// Encrypt cipher a message using the apps key.
-func (a *Api) Encrypt(subject []byte) ([]byte, error) {
-	return a.capsule.Encrypt(subject)
-}
-
 // Name A name/ID given to the application.
 func (a *Api) Name() string {
 	return a.name
+}
+
+// Provider get an OIDC provider from the manager.
+func (a *Api) Provider(authProvider string) any {
+	p, e1 := a.providerManager.Get(authProvider)
+	if e1 != nil {
+		Log.Errf(stderr.AuthProviderLookup, e1.Error())
+	}
+
+	return p
+}
+
+// ProviderManager Return the authentication manager.
+func (a *Api) ProviderManager() ProviderManager {
+	return a.providerManager
 }
 
 // RouteNotFound Add a http.HandlerFunc to return a response when a route is
 // not found.
 func (a *Api) RouteNotFound(handler Route) {
 	a.router.NotFound(handler)
-}
-
-func (a *Api) Service(key string) (interface{}, error) {
-	return a.serviceManager.Get(key)
-}
-
-// ServiceManager Get the handler for retrieving services.
-func (a *Api) ServiceManager() ServiceManager {
-	return a.serviceManager
-}
-
-// Session Get the session manager.
-func (a *Api) Session() (*session.Manager, error) {
-	x, e1 := a.serviceManager.Get(KeySessionManager)
-	if e1 != nil {
-		return nil, e1
-	}
-	return x.(*session.Manager), nil
-}
-
-// TmplManager Template engine that renders templates.
-func (a *Api) TmplManager() TemplateManager {
-	return a.tmplManager
 }
 
 // ServeHTTP Will be called for every request to this server. There is no need
@@ -159,6 +135,28 @@ func (a *Api) ServeLambda(event *awslambda.Input) (*awslambda.Output, error) {
 	processRequest(w, r, a)
 
 	return w, nil
+}
+func (a *Api) Service(key string) (interface{}, error) {
+	return a.serviceManager.Get(key)
+}
+
+// ServiceManager Get the handler for retrieving services.
+func (a *Api) ServiceManager() ServiceManager {
+	return a.serviceManager
+}
+
+// Session Get the session manager.
+func (a *Api) Session() (*session.Manager, error) {
+	x, e1 := a.serviceManager.Get(KeySessionManager)
+	if e1 != nil {
+		return nil, e1
+	}
+	return x.(*session.Manager), nil
+}
+
+// TmplManager Template engine that renders templates.
+func (a *Api) TmplManager() TemplateManager {
+	return a.tmplManager
 }
 
 // processRequest responsibilities:

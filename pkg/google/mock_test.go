@@ -12,6 +12,11 @@ type MockApp struct {
 	name       string
 }
 
+func (m *MockApp) Provider(s string) any {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *MockApp) LoadGPG() {
 	//TODO implement me
 	panic("implement me")
