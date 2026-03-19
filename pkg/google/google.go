@@ -18,10 +18,11 @@ import (
 // * max - maximum
 const (
 	// Used as a hint when the user attempts to login with the provider.
-	fEmail = "email"
-	fCode  = "code"
-	fState = "state"
-	name   = "google"
+	fEmail            = "email"
+	fCode             = "code"
+	fState            = "state"
+	KeyGoogleProvider = "gp"
+	name              = "google"
 )
 
 var (
@@ -40,7 +41,7 @@ func AuthLink(w http.ResponseWriter, r *http.Request, app backend.App) {
 		email = "" // It's not required, so it is O.K. to leave it out.
 	}
 
-	p, e1 := app.ProviderManager().Get(backend.KeyGoogleProvider)
+	p, e1 := app.ProviderManager().Get(KeyGoogleProvider)
 	if e1 != nil {
 		backend.HandleError(e1, w)
 		return
@@ -85,7 +86,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, app backend.App) {
 		return
 	}
 
-	p, e1 := app.ProviderManager().Get(backend.KeyGoogleProvider)
+	p, e1 := app.ProviderManager().Get(KeyGoogleProvider)
 	if e1 != nil {
 		backend.HandleError(e1, w)
 		return
@@ -108,7 +109,7 @@ func SignIn(w http.ResponseWriter, r *http.Request, app backend.App) {
 func SignOut(w http.ResponseWriter, _ *http.Request, app backend.App) {
 	endpoint := "/?signed-out=1"
 
-	p, e2 := app.ProviderManager().Get(backend.KeyGoogleProvider)
+	p, e2 := app.ProviderManager().Get(KeyGoogleProvider)
 	if e2 != nil {
 		backend.HandleError(e2, w)
 		return
@@ -140,7 +141,7 @@ func Callback(w http.ResponseWriter, r *http.Request, app backend.App) {
 	code := queryParams.Get(fCode)
 	state := queryParams.Get(fState)
 
-	gpX, e1 := app.ProviderManager().Get(backend.KeyGoogleProvider)
+	gpX, e1 := app.ProviderManager().Get(KeyGoogleProvider)
 	if e1 != nil {
 		backend.HandleError(e1, w)
 		return
