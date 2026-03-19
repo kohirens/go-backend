@@ -5,11 +5,17 @@ import (
 
 	"github.com/kohirens/go-backend"
 	"github.com/kohirens/www/awslambda"
+	"github.com/kohirens/www/session"
 )
 
 type MockApp struct {
 	Authorizer backend.ProviderManager
 	name       string
+}
+
+func (m *MockApp) Session() (*session.Manager, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (m *MockApp) Provider(s string) any {

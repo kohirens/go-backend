@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/kohirens/www/awslambda"
+	"github.com/kohirens/www/session"
 	"github.com/kohirens/www/storage"
 )
 
@@ -22,6 +23,7 @@ type App interface {
 	Service(key string) (interface{}, error)
 	ServiceManager() ServiceManager
 	TmplManager() TemplateManager
+	Session() (*session.Manager, error)
 }
 
 // New A nNew initialized application instance.
