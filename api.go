@@ -136,6 +136,8 @@ func (a *Api) ServeLambda(event *awslambda.Input) (*awslambda.Output, error) {
 
 	return w, nil
 }
+
+// Service returns a service by name.
 func (a *Api) Service(key string) (interface{}, error) {
 	return a.serviceManager.Get(key)
 }
