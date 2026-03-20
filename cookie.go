@@ -1,4 +1,4 @@
-package google
+package backend
 
 import (
 	"encoding/base64"
@@ -6,21 +6,21 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/kohirens/go-backend"
 )
 
+const EncryptedCookieName = "_ec_"
+
 type EncryptedCookie struct {
-	AID          string
-	DID          string
-	UA           string
 	LastActivity time.Time
+	Name         string
+	Value        []byte
 }
 
-const ecCookieName = "_ec_"
-
-func GetEncryptedCookie(r *http.Request, a backend.App) (*EncryptedCookie, error) {
-	cookie, e1 := r.Cookie(ecCookieName)
+// DecryptCookie using a GPG key to allow working with the cookie data.
+//
+//	The GPG key has to have been loaded.
+func DecryptCookie(name string, r *http.Request, a App) (*EncryptedCookie, error) {
+	cookie, e1 := r.Cookie(name)
 	if e1 != nil {
 		return nil, fmt.Errorf(stderr.ECCookie, e1.Error())
 	}
@@ -43,35 +43,36 @@ func GetEncryptedCookie(r *http.Request, a backend.App) (*EncryptedCookie, error
 	return ec, nil
 }
 
-func SetEncryptedCookie(
-	accountID,
-	deviceID,
-	userAgent string,
+// EncryptCookie encrypts data before storing it in a cookie.
+func EncryptCookie(
+	name,
+	value,
+	path string,
 	w http.ResponseWriter,
-	a backend.App,
+	a App,
 ) error {
 	ec := &EncryptedCookie{
-		AID:          accountID,
-		DID:          deviceID,
-		UA:           userAgent,
+		Name:         name,
+		Value:        []byte(value),
 		LastActivity: time.Now(),
 	}
 
-	ecBytes, e15 := json.Marshal(ec)
-	if e15 != nil {
-		return fmt.Errorf(stderr.EncodeJSON, e15.Error())
+	ecBytes, e1 := json.Marshal(ec)
+	if e1 != nil {
+		return fmt.Errorf(stderr.EncodeJSON, e1.Error())
 	}
 
-	encodeMessage, e10 := a.Encrypt(ecBytes)
-	if e10 != nil {
-		return e10
+	encodeMessage, e2 := a.Encrypt(ecBytes)
+	if e2 != nil {
+		return e2
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:   ecCookieName,
+		Name:   name,
 		Value:  base64.StdEncoding.EncodeToString(encodeMessage),
-		Path:   "/",
+		Path:   path,
 		Secure: true,
 	})
+
 	return nil
 }

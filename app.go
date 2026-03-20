@@ -45,6 +45,9 @@ func New(
 	}
 }
 
+// NewWithDefaults initialize a new backend application. The name MUST match
+// the filename of GPG key stored in JSON format and located in /secrets of the
+// storage.
 func NewWithDefaults(name string, store storage.Storage) App {
 	return New(
 		name,

@@ -3,7 +3,6 @@ package google
 var stderr = struct {
 	DecodeBase64,
 	DecodeJSON,
-	ECCookie,
 	EncodeJSON,
 	EndpointNotFound,
 	GetAccount,
@@ -14,9 +13,7 @@ var stderr = struct {
 	ValidEmail,
 	WriteResponseBody string
 }{
-	DecodeBase64:      "cannot decode string as base64: %v",
 	DecodeJSON:        "cannot decode json: %v",
-	ECCookie:          "cannot get the encrypted cookie: %v",
 	EncodeJSON:        "cannot encode json: %v",
 	EndpointNotFound:  "no api endpoint %v can be found",
 	GetAccount:        "failed to get the account",
@@ -31,6 +28,9 @@ var stderr = struct {
 var stdout = struct {
 	AccountID,
 	AddDevice,
+	ClientApp,
+	Date,
+	DecodeJSON,
 	DeviceID,
 	EncryptedCookie,
 	EncryptedCookieValue,
@@ -47,6 +47,9 @@ var stdout = struct {
 }{
 	AccountID:            "account ID: %v",
 	AddDevice:            "adding device %v",
+	ClientApp:            "client app ",
+	Date:                 "date and time %v",
+	DecodeJSON:           "decoding json %v",
 	DeviceID:             "device ID: %v",
 	EncryptedCookie:      "looking for an encrypted cookie...",
 	EncryptedCookieValue: "setting encrypted value cookie",

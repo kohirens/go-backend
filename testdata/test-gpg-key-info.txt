@@ -1,0 +1,9 @@
+Real Name: Test Process
+Email address: noreply@example.com
+Comment: Check your code
+Passphrase: test1234!
+---
+pub   ed25519 2026-03-20 [SC]
+      B65030598CD0502BFC57B521FAE4CDB473BD2248
+uid                      Test Process (Check your code) <noreply@example.com>
+sub   cv25519 2026-03-20 [E]
