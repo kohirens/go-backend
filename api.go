@@ -30,6 +30,8 @@ type Api struct {
 	tmplManager     TemplateManager
 }
 
+var _ App = (*Api)(nil)
+
 // AddProvider Wrapper method that adds an auth provider to the ProviderManager
 // for retrieval during request handling.
 func (a *Api) AddProvider(key string, provider sso.OIDCProvider) {
@@ -170,7 +172,7 @@ func (a *Api) TmplManager() TemplateManager {
 //  3. Save the session before sending an HTTP response.
 func processRequest(w http.ResponseWriter, r *http.Request, a *Api) {
 	rawPath := r.URL.Path
-	Log.Infof("request %v %v", r.Method, rawPath)
+	Log.Infof(stdout.RequestInfo, r.Method, rawPath)
 
 	idCookie, _ := r.Cookie(session.IDKey)
 	if e := a.RestoreSessionData(w, idCookie); e != nil {
@@ -203,6 +205,7 @@ func processRequest(w http.ResponseWriter, r *http.Request, a *Api) {
 	if e := a.SaveSessionData(w, r); e != nil {
 		Log.Errf("%v", e.Error())
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
 
