@@ -134,6 +134,9 @@ func (a *Api) ServeLambda(event *awslambda.Input) (*awslambda.Output, error) {
 
 	processRequest(w, r, a)
 
+	// You MUST convert http.Header to the format the Lambda expects them.
+	// Otherwise, Lambda will not return them in the response.
+	w.Headers = awslambda.ConvertToLambdaHttpHeaders(w.Header())
 	return w, nil
 }
 
