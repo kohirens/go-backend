@@ -4,6 +4,7 @@ go 1.24.0
 
 require (
 	github.com/google/uuid v1.6.0
+	github.com/kohirens/go-login v0.0.0-20260326134142-01063b092c96
 	github.com/kohirens/sso v0.0.0-20260224193101-be9248dd35d6
 	github.com/kohirens/stdlib v0.0.0-20251219022316-7c7cc7222efd
 	github.com/kohirens/www v0.0.0-20260320163523-ce92c9f07016
@@ -32,7 +33,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.6 // indirect
 	github.com/aws/smithy-go v1.24.0 // indirect
 	github.com/cloudflare/circl v1.6.1 // indirect
-	github.com/kohirens/go-login v0.0.0-20260321231428-7c48d95a589c // indirect
 	github.com/kohirens/json-web-token v0.0.0-20251010155233-f326c8352886 // indirect
 	github.com/kohirens/storage v0.0.0-20260222212532-ac6998f7649f // indirect
 	github.com/mileusna/useragent v1.3.5 // indirect
