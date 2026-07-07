@@ -13,7 +13,7 @@ type MockApp struct {
 	name       string
 }
 
-func (m *MockApp) Session() (*session.Manager, error) {
+func (m *MockApp) SessionManager() (*session.Manager, error) {
 	//TODO implement me
 	panic("implement me")
 }

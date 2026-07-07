@@ -152,8 +152,10 @@ func (a *Api) ServiceManager() ServiceManager {
 	return a.serviceManager
 }
 
-// Session Get the session manager.
-func (a *Api) Session() (*session.Manager, error) {
+// SessionManager Getter for the session manager.
+// Go-Backend requires session handling, and it is considered a fatal error if
+// there is no session manager instance.
+func (a *Api) SessionManager() (*session.Manager, error) {
 	x, e1 := a.serviceManager.Get(KeySessionManager)
 	if e1 != nil {
 		return nil, e1
@@ -174,14 +176,14 @@ func processRequest(w http.ResponseWriter, r *http.Request, a *Api) {
 	rawPath := r.URL.Path
 	Log.Infof(stdout.RequestInfo, r.Method, rawPath)
 
-	sess, e1 := a.Session()
+	sess, e1 := a.SessionManager()
 	if e1 != nil {
 		Log.Errf("%v", e1.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	// If there is a session data, now is the time to restore it.
+	// If there is session data, now is the time to restore it.
 	if e := sess.LoadFromCookie(r); e != nil {
 		Log.Errf("%v", e.Error())
 	}
@@ -239,7 +241,7 @@ func (a *Api) RestoreSessionData(sm *session.Manager) error {
 }
 
 func (a *Api) SaveSessionData(w http.ResponseWriter, r *http.Request) error {
-	sm, e1 := a.Session()
+	sm, e1 := a.SessionManager()
 	if e1 != nil {
 		return e1
 	}

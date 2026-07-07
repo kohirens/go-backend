@@ -23,7 +23,7 @@ type App interface {
 	Service(key string) (interface{}, error)
 	ServiceManager() ServiceManager
 	TmplManager() TemplateManager
-	Session() (*session.Manager, error)
+	SessionManager() (*session.Manager, error)
 }
 
 // New A nNew initialized application instance.
