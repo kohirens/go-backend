@@ -174,18 +174,25 @@ func processRequest(w http.ResponseWriter, r *http.Request, a *Api) {
 	rawPath := r.URL.Path
 	Log.Infof(stdout.RequestInfo, r.Method, rawPath)
 
-	idCookie, _ := r.Cookie(session.IDKey)
-	if e := a.RestoreSessionData(w, idCookie); e != nil {
-		Log.Errf("%v", e.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-
 	sess, e1 := a.Session()
 	if e1 != nil {
 		Log.Errf("%v", e1.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
+
+	// If there is a session data, now is the time to restore it.
+	if e := sess.LoadFromCookie(r); e != nil {
+		Log.Errf("%v", e.Error())
+	}
+
 	sessionTime := sess.Expiration().UTC().Sub(time.Now().UTC())
 	Log.Dbugf(stdout.SessionTime, sessionTime)
+
+	if e := a.RestoreSessionData(sess); e != nil {
+		Log.Errf("%v", e.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 
 	// Add common variables to the template manager.
 	a.tmplManager.AppendVars(Variables{
@@ -209,15 +216,7 @@ func processRequest(w http.ResponseWriter, r *http.Request, a *Api) {
 	}
 }
 
-func (a *Api) RestoreSessionData(w http.ResponseWriter, idCookie *http.Cookie) error {
-	sm, e1 := a.Session()
-	if e1 != nil {
-		return e1
-	}
-
-	sm.Load(w, idCookie)
-
-	// TODO pull from the cookie which provider the client chose.
+func (a *Api) RestoreSessionData(sm *session.Manager) error {
 	gp, e2 := a.providerManager.Get(KeyGoogleProvider)
 	if e2 != nil {
 		return e2

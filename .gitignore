@@ -6,6 +6,7 @@
 # Files
 # -----
 .ash_history
+*.asc
 /build-version.json
 go.work
 go.work.sum
