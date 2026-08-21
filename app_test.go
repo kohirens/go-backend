@@ -38,7 +38,8 @@ func TestNew(t *testing.T) {
 }
 
 type MockProvider struct {
-	m map[string]oidc.Provider
+	user string
+	m    map[string]oidc.Provider
 }
 
 func (mp *MockProvider) Callback(params url.Values) error {
@@ -47,10 +48,15 @@ func (mp *MockProvider) Callback(params url.Values) error {
 }
 
 func (mp *MockProvider) UserInfo() oidc.UserInfo {
-	//TODO implement me
 	switch mp.user {
-	case "test":
-		return &login.UserInfo{}
+	default:
+		return login.NewUserInfo(
+			"mctest_t@example.com",
+			"tester",
+			"McTest",
+			"555-555-5555",
+			"en-US",
+		)
 	}
 }
 

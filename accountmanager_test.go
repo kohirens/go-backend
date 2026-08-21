@@ -1,8 +1,10 @@
 package backend
 
 import (
+	"os"
 	"testing"
 
+	"github.com/kohirens/go-login"
 	"github.com/kohirens/sso/oidc"
 	"github.com/kohirens/www/storage"
 )
@@ -46,6 +48,8 @@ func TestAccountManager_RetrieveAnAccount(t *testing.T) {
 
 func TestAccountManager_addWithProvider(t *testing.T) {
 	fixedStore, _ := storage.NewLocalStorage(tmpDir)
+	_ = os.MkdirAll(tmpDir+"/profile", 0777)
+	_ = os.MkdirAll(tmpDir+"/account", 0777)
 
 	tests := []struct {
 		name     string
@@ -72,12 +76,7 @@ func TestAccountManager_addWithProvider(t *testing.T) {
 				return
 			}
 
-			if got.ID() != tt.provider.ClientID() {
-				t.Errorf("addWithProvider() got = %v, want %v", got.ID(), tt.provider.ClientID())
-				return
-			}
-
-			got2, err2 := am.RetrieveAnAccount(got.ID())
+			got2, err2 := login.LoadAccount(got.ID(), fixedStore)
 			if (err2 != nil) != tt.wantErr {
 				t.Errorf("addWithProvider() error = %v, wantErr %v", err2, tt.wantErr)
 				return

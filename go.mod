@@ -3,7 +3,7 @@ module github.com/kohirens/go-backend
 go 1.24.9
 
 require (
-	github.com/kohirens/go-login v0.0.0-20260821025838-fbb1b9f39a96
+	github.com/kohirens/go-login v0.0.0-20260821034504-ab0b8f25b970
 	github.com/kohirens/sso v0.0.0-20260224193101-be9248dd35d6
 	github.com/kohirens/sso/oidc v0.0.0-20260715000949-38fb171a1efe
 	github.com/kohirens/stdlib v0.0.0-20251219022316-7c7cc7222efd
