@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/kohirens/sso"
+	"github.com/kohirens/sso/oidc"
 	"github.com/kohirens/www/awslambda"
 	"github.com/kohirens/www/gpg"
 	"github.com/kohirens/www/session"
@@ -20,7 +21,7 @@ import (
 // these components are replaceable as long as the meet the interface
 // requirements.
 type Api struct {
-	providerManager ProviderManager
+	providerManager *ProviderManager
 	capsule         *gpg.Capsule
 	gpgKey          *appKey
 	name            string
@@ -34,7 +35,7 @@ var _ App = (*Api)(nil)
 
 // AddProvider Wrapper method that adds an auth provider to the ProviderManager
 // for retrieval during request handling.
-func (a *Api) AddProvider(key string, provider sso.OIDCProvider) {
+func (a *Api) AddProvider(key string, provider oidc.Provider) {
 	a.providerManager.Add(key, provider)
 }
 
@@ -62,7 +63,7 @@ func (a *Api) Encrypt(subject []byte) ([]byte, error) {
 func (a *Api) LoadGPG() {
 	Log.Dbugf("%v", stdout.LoadGPG)
 
-	gpgData, e1 := a.storage.Load(PrefixSecrets + "/" + a.Name() + ".json")
+	gpgData, e1 := a.storage.Load(prefixSecrets + "/" + a.Name() + ".json")
 	if e1 != nil {
 		panic(e1.Error())
 	}
@@ -87,18 +88,8 @@ func (a *Api) Name() string {
 	return a.name
 }
 
-// Provider get an OIDC provider from the manager.
-func (a *Api) Provider(authProvider string) any {
-	p, e1 := a.providerManager.Get(authProvider)
-	if e1 != nil {
-		Log.Errf(stderr.AuthProviderLookup, e1.Error())
-	}
-
-	return p
-}
-
 // ProviderManager Return the authentication manager.
-func (a *Api) ProviderManager() ProviderManager {
+func (a *Api) ProviderManager() *ProviderManager {
 	return a.providerManager
 }
 
@@ -140,11 +131,6 @@ func (a *Api) ServeLambda(event *awslambda.Input) (*awslambda.Output, error) {
 	// Otherwise, Lambda will not return them in the response.
 	w.Headers = awslambda.ConvertToLambdaHttpHeaders(w.Header())
 	return w, nil
-}
-
-// Service returns a service by name.
-func (a *Api) Service(key string) (interface{}, error) {
-	return a.serviceManager.Get(key)
 }
 
 // ServiceManager Get the handler for retrieving services.

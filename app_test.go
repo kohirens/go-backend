@@ -1,17 +1,19 @@
 package backend
 
 import (
+	"net/url"
 	"reflect"
 	"testing"
 
-	"github.com/kohirens/sso"
+	"github.com/kohirens/go-login"
+	"github.com/kohirens/sso/oidc"
 	"github.com/kohirens/www/storage"
 )
 
 func TestNew(t *testing.T) {
 	tests := []struct {
 		name     string
-		provider sso.OIDCProvider
+		provider oidc.Provider
 		want     reflect.Type
 	}{
 		{
@@ -25,7 +27,7 @@ func TestNew(t *testing.T) {
 			fixture := NewWithDefaults("test", nil)
 
 			fixture.ProviderManager().Add("gp", tt.provider)
-			got := fixture.Provider("gp")
+			got, _ := fixture.ProviderManager().Get("gp")
 			gotType := reflect.TypeOf(got)
 
 			if gotType != tt.want {
@@ -36,42 +38,60 @@ func TestNew(t *testing.T) {
 }
 
 type MockProvider struct {
-	m map[string]sso.OIDCProvider
+	m map[string]oidc.Provider
 }
 
-func (mp *MockProvider) Add(name string, provider sso.OIDCProvider) {
+func (mp *MockProvider) Callback(params url.Values) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (mp *MockProvider) UserInfo() oidc.UserInfo {
+	//TODO implement me
+	switch mp.user {
+	case "test":
+		return &login.UserInfo{}
+	}
+}
+
+func (mp *MockProvider) String() string {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (mp *MockProvider) Add(name string, provider oidc.Provider) {
 	mp.m[name] = provider
 }
 
-func (m *MockProvider) Get(name string) (sso.OIDCProvider, error) {
-	return m.m[name], nil
+func (mp *MockProvider) Get(name string) (oidc.Provider, error) {
+	return mp.m[name], nil
 }
-func (p *MockProvider) AuthLink(loginHint string) (string, error) {
+func (mp *MockProvider) AuthLink(loginHint string) (string, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p *MockProvider) Name() string {
+func (mp *MockProvider) Name() string {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p *MockProvider) Application() string {
+func (mp *MockProvider) Application() string {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p *MockProvider) ClientEmail() string {
+func (mp *MockProvider) ClientEmail() string {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p *MockProvider) ClientID() string {
+func (mp *MockProvider) ClientID() string {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p *MockProvider) SignOut() error {
+func (mp *MockProvider) SignOut() error {
 	//TODO implement me
 	panic("implement me")
 }

@@ -8,8 +8,8 @@ import (
 	"github.com/kohirens/go-backend"
 	"github.com/kohirens/go-login"
 	"github.com/kohirens/sso"
-	"github.com/kohirens/sso/pkg/google"
 	"github.com/kohirens/stdlib/logger"
+	"github.com/kohirens/storage"
 	"github.com/kohirens/www/validation"
 )
 
@@ -19,8 +19,6 @@ import (
 const (
 	// Used as a hint when the user attempts to login with the provider.
 	fEmail            = "email"
-	fCode             = "code"
-	fState            = "state"
 	KeyGoogleProvider = "gp"
 	name              = "google"
 )
@@ -135,25 +133,25 @@ func SignOut(w http.ResponseWriter, _ *http.Request, app backend.App) {
 // Callback Handles callback request initiated from a Google
 // authentication server when the client chose to sign in with Google.
 func Callback(w http.ResponseWriter, r *http.Request, app backend.App) {
-	Log.Dbugf("%v", stdout.GoogleCallback)
-
 	queryParams := r.URL.Query()
-	code := queryParams.Get(fCode)
-	state := queryParams.Get(fState)
+	userAgent := r.Header.Get("User-Agent")
+	pm := app.ProviderManager()
 
-	gpX, e1 := app.ProviderManager().Get(KeyGoogleProvider)
-	if e1 != nil {
-		backend.HandleError(e1, w)
-		return
-	}
-	gp := gpX.(*google.Provider)
-
-	// Exchange the 1 time code for an ID and refresh tokens.
-	if e2 := gp.ExchangeCodeForToken(state, code); e2 != nil {
-		backend.HandleError(e2, w)
+	if e := pm.Callback(queryParams); e != nil {
+		backend.HandleError(e, w)
 		return
 	}
 
+	// Get the storage manager so we can pull the account and profile.
+	storeX, e4 := app.ServiceManager().Get("store")
+	if e4 != nil {
+		backend.HandleError(e4, w)
+		return
+	}
+	store := storeX.(storage.Storage)
+
+	account, e1 := pm.RetrieveAccount(pm, store)
+	
 	// Load the client's profile.
 
 	// Get and decrypt the clientApp data.
@@ -163,27 +161,21 @@ func Callback(w http.ResponseWriter, r *http.Request, app backend.App) {
 		Log.Warnf("%v", e3.Error())
 	}
 
+	// get client app or register a new one.
 	var clientApp *login.ClientApp
+	var err error
 	if ec != nil {
-		var err error
-		clientApp, err = login.LoadClientApp(ec.Value)
-		if err != nil {
-			Log.Warnf("%v", err.Error())
-		}
+		// TODO: Convert encrypted cookie to the proper object.
+		clientApp, err = login.LoadClientApp(string(ec.Value), store)
 	} else {
-		clientApp = login.NewClientApp()
+		clientApp, err = login.RegisterClientApp(userAgent, gp, store)
+	}
+	if err != nil {
+		Log.Errf("%v", err.Error())
+		return
 	}
 
-	Log.Infof(stdout.ClientApp, clientApp.Id)
-	Log.Infof("%v", clientApp.LastDate.UTC().Format(time.RFC3339))
-
-	// Get the storage manager so we can pull the account and profile.
-	//storeX, e4 := app.ServiceManager().Get("store")
-	//if e4 != nil {
-	//	backend.HandleError(e4, w)
-	//	return
-	//}
-	//store := storeX.(storage.Storage)
+	Log.Infof("%v", clientApp.LastActivity.UTC().Format(time.RFC3339))
 
 	//var account *login.Account
 	//
@@ -272,25 +264,4 @@ func Callback(w http.ResponseWriter, r *http.Request, app backend.App) {
 	// send user to a predetermined link or the dashboard.
 	w.Header().Set("Location", LoginRedirect)
 	w.WriteHeader(http.StatusSeeOther)
-}
-
-// RegisterNewAccount Make a new account only when a client has a successful
-// login.
-func registerNewAccount(
-	am backend.AccountManager,
-	gp *google.Provider,
-) (*backend.Account, error) {
-	Log.Dbugf("%v", stdout.RegisterAccount)
-
-	account, e1 := am.AddWithProvider(gp.ClientID(), gp.Name())
-	if e1 != nil {
-		return nil, e1
-	}
-	Log.Dbugf(stdout.NewAccount, account.ID)
-
-	// TODO: Change this to gp.Profile() which will have client ID, email address, first, and last name.
-	account.GoogleId = gp.ClientID()
-	account.Email = gp.ClientEmail()
-
-	return account, nil
 }

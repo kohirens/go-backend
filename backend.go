@@ -2,10 +2,10 @@ package backend
 
 import (
 	"github.com/kohirens/stdlib/logger"
-	"github.com/kohirens/www/storage"
 )
 
 const (
+	KeyAccountManager = "am"
 	KeyGoogleProvider = "gp"
 	KeySessionManager = "sm"
 
@@ -16,19 +16,11 @@ const (
 	<body></body>
 </html>`
 	TmplSuffix = "tmpl"
-)
 
-const (
-	KeyAccountManager = "am"
-	PrefixAccounts    = "accounts"
-	PrefixSecrets     = "secrets"
+	prefixSecrets = "secrets"
 )
 
 var (
 	Log     = &logger.Standard{}
 	TmplDir = "templates"
 )
-
-func NewAccountExec(store storage.Storage) *AccountExec {
-	return &AccountExec{store: store}
-}

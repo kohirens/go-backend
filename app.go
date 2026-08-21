@@ -11,8 +11,7 @@ import (
 type App interface {
 	AddRoute(endpoint string, handler Route)
 	AddService(key string, service interface{})
-	ProviderManager() ProviderManager
-	Provider(string) any
+	ProviderManager() *ProviderManager
 	Decrypt(message []byte) ([]byte, error)
 	Encrypt(message []byte) ([]byte, error)
 	LoadGPG()
@@ -20,7 +19,6 @@ type App interface {
 	RouteNotFound(handler Route)
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
 	ServeLambda(event *awslambda.Input) (*awslambda.Output, error)
-	Service(key string) (interface{}, error)
 	ServiceManager() ServiceManager
 	TmplManager() TemplateManager
 	SessionManager() (*session.Manager, error)
@@ -32,7 +30,7 @@ func New(
 	router RouteManager,
 	serviceManager ServiceManager,
 	tmpl TemplateManager,
-	authManager ProviderManager,
+	pm *ProviderManager,
 	store storage.Storage,
 ) App {
 	return &Api{
@@ -40,7 +38,7 @@ func New(
 		serviceManager:  serviceManager,
 		router:          router,
 		tmplManager:     tmpl,
-		providerManager: authManager,
+		providerManager: pm,
 		storage:         store,
 	}
 }
