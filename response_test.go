@@ -1,17 +1,16 @@
-package google
+package backend
 
 import (
 	"net/http"
 	"net/url"
 	"testing"
 
-	"github.com/kohirens/go-backend"
 	"github.com/kohirens/stdlib/test"
 )
 
 func TestAuthLink(t *testing.T) {
-	goodAuth := backend.NewProviderManager()
-	goodAuth.Add(backend.KeyGoogleProvider, &MockProvider{
+	goodAuth := NewProviderManager()
+	goodAuth.Add(KeyGoogleProvider, &MockProvider{
 		ExpectedAuthLink: "good-link",
 	})
 
@@ -19,7 +18,7 @@ func TestAuthLink(t *testing.T) {
 		name    string
 		w       http.ResponseWriter
 		r       *http.Request
-		a       backend.App
+		a       App
 		wantErr bool
 	}{
 		{
@@ -39,7 +38,7 @@ func TestAuthLink(t *testing.T) {
 				},
 			},
 			&MockApp{
-				Authorizer: backend.NewProviderManager(),
+				Authorizer: NewProviderManager(),
 			},
 			true,
 		},
@@ -69,8 +68,8 @@ func TestAuthLink(t *testing.T) {
 }
 
 func TestSignIn(t *testing.T) {
-	goodAuth := backend.NewProviderManager()
-	goodAuth.Add(backend.KeyGoogleProvider, &MockProvider{
+	goodAuth := NewProviderManager()
+	goodAuth.Add(KeyGoogleProvider, &MockProvider{
 		ExpectedAuthLink: "good-link",
 	})
 
@@ -78,7 +77,7 @@ func TestSignIn(t *testing.T) {
 		name    string
 		w       http.ResponseWriter
 		r       *http.Request
-		a       backend.App
+		a       App
 		wantErr bool
 	}{
 		{
@@ -98,7 +97,7 @@ func TestSignIn(t *testing.T) {
 				},
 			},
 			&MockApp{
-				Authorizer: backend.NewProviderManager(),
+				Authorizer: NewProviderManager(),
 			},
 			true,
 		},
@@ -128,8 +127,8 @@ func TestSignIn(t *testing.T) {
 }
 
 func TestSignOut(t *testing.T) {
-	goodAuth := backend.NewProviderManager()
-	goodAuth.Add(backend.KeyGoogleProvider, &MockProvider{
+	goodAuth := NewProviderManager()
+	goodAuth.Add(KeyGoogleProvider, &MockProvider{
 		ExpectedAuthLink: "good-link",
 	})
 
@@ -137,7 +136,7 @@ func TestSignOut(t *testing.T) {
 		name    string
 		w       http.ResponseWriter
 		r       *http.Request
-		a       backend.App
+		a       App
 		wantErr bool
 	}{
 		{
@@ -154,7 +153,7 @@ func TestSignOut(t *testing.T) {
 				},
 			},
 			&MockApp{
-				Authorizer: backend.NewProviderManager(),
+				Authorizer: NewProviderManager(),
 			},
 			true,
 		},

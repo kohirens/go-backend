@@ -16,6 +16,7 @@ var stderr = struct {
 	MakeDir,
 	MaxLen,
 	NoRoutes,
+	ParseSignInData,
 	ProviderNotFound,
 	RenderFiles,
 	SeeOther,
@@ -27,7 +28,9 @@ var stderr = struct {
 	TemplateParse,
 	UnmarshalJSON,
 	UUID,
-	WriteResponse string
+	ValidEmail,
+	WriteResponse,
+	WriteResponseBody string
 }{
 	AbsPath:            "could not get absolute path for %v: %v",
 	AccountNotFound:    "account %v not found",
@@ -44,6 +47,7 @@ var stderr = struct {
 	MakeDir:            "could not make dir: %v",
 	MaxLen:             "field %v exceeds max length of %v",
 	NoRoutes:           "no routes registered",
+	ParseSignInData:    "could not parse login form data: %v",
 	ProviderNotFound:   "OIDC provider %v was not found",
 	RenderFiles:        "render files %v",
 	SeeOther:           "see other %v",
@@ -55,11 +59,14 @@ var stderr = struct {
 	TemplateParse:      "cannot parse template: %v",
 	UnmarshalJSON:      "json unmarshall error %v %v, offset: %v",
 	UUID:               "cannot generate UUID: %v",
+	ValidEmail:         "email failed validation: %v",
 	WriteResponse:      "cannot write response: %v",
+	WriteResponseBody:  "cannot write response body: %v",
 }
 
 var stdout = struct {
 	CurrentVersion,
+	EncryptedCookie,
 	LoadGPG,
 	LoadStorage,
 	LoadTemplate,
@@ -73,17 +80,18 @@ var stdout = struct {
 	Started,
 	TemplateLoad string
 }{
-	CurrentVersion: "%v, %v",
-	LoadGPG:        "loading GPG key",
-	LoadStorage:    "load storage from key: %v",
-	LoadTemplate:   "load template %v",
-	NewProfile:     "made new profile %v",
-	Nothing:        "nothing to do, bye!",
-	PageDone:       "done loading page",
-	RequestInfo:    "request %v %v",
-	RestoreSession: "attempting to restore previous session ID %v",
-	SaveStorage:    "save storage %v",
-	SessionTime:    "session time: %v",
-	Started:        "handler started",
-	TemplateLoad:   "loaded template: %v",
+	CurrentVersion:  "%v, %v",
+	EncryptedCookie: "looking for an encrypted cookie...",
+	LoadGPG:         "loading GPG key",
+	LoadStorage:     "load storage from key: %v",
+	LoadTemplate:    "load template %v",
+	NewProfile:      "made new profile %v",
+	Nothing:         "nothing to do, bye!",
+	PageDone:        "done loading page",
+	RequestInfo:     "request %v %v",
+	RestoreSession:  "attempting to restore previous session ID %v",
+	SaveStorage:     "save storage %v",
+	SessionTime:     "session time: %v",
+	Started:         "handler started",
+	TemplateLoad:    "loaded template: %v",
 }

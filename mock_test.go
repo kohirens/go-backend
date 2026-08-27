@@ -1,17 +1,14 @@
-package google
+package backend
 
 import (
 	"net/http"
-	"net/url"
 
-	"github.com/kohirens/go-backend"
-	"github.com/kohirens/sso/oidc"
 	"github.com/kohirens/www/awslambda"
 	"github.com/kohirens/www/session"
 )
 
 type MockApp struct {
-	Authorizer *backend.ProviderManager
+	Authorizer *ProviderManager
 	name       string
 }
 
@@ -40,7 +37,7 @@ func (m *MockApp) Encrypt(message []byte) ([]byte, error) {
 	panic("implement me")
 }
 
-func (m *MockApp) AddRoute(endpoint string, handler backend.Route) {
+func (m *MockApp) AddRoute(endpoint string, handler Route) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -50,7 +47,7 @@ func (m *MockApp) AddService(key string, service interface{}) {
 	panic("implement me")
 }
 
-func (m *MockApp) ProviderManager() *backend.ProviderManager {
+func (m *MockApp) ProviderManager() *ProviderManager {
 	return m.Authorizer
 }
 
@@ -58,17 +55,17 @@ func (m *MockApp) Name() string {
 	return m.name
 }
 
-func (m *MockApp) ServiceManager() backend.ServiceManager {
+func (m *MockApp) ServiceManager() ServiceManager {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (m *MockApp) TmplManager() backend.TemplateManager {
+func (m *MockApp) TmplManager() TemplateManager {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (m *MockApp) RouteNotFound(handler backend.Route) {
+func (m *MockApp) RouteNotFound(handler Route) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -84,30 +81,6 @@ func (m *MockApp) ServeLambda(event *awslambda.Input) (*awslambda.Output, error)
 }
 
 func (m *MockApp) Service(key string) (interface{}, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-type MockProvider struct {
-	ExpectedAuthLink      string
-	ExpectedApp           string
-	ExpectedClientID      string
-	ExpectedEmail         string
-	ExpectedName          string
-	ExpectedAuthLinkError error
-}
-
-func (m *MockProvider) Callback(params url.Values) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *MockProvider) UserInfo() oidc.UserInfo {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *MockProvider) String() string {
 	//TODO implement me
 	panic("implement me")
 }

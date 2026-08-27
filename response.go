@@ -1,14 +1,11 @@
-package google
+package backend
 
 import (
 	"fmt"
 	"net/http"
 
-	"github.com/kohirens/go-backend"
-	"github.com/kohirens/go-login"
 	"github.com/kohirens/sso"
-	"github.com/kohirens/stdlib/logger"
-	"github.com/kohirens/storage"
+	"github.com/kohirens/www/backend"
 	"github.com/kohirens/www/validation"
 )
 
@@ -17,22 +14,18 @@ import (
 // * max - maximum
 const (
 	// Used as a hint when the user attempts to login with the provider.
-	fEmail            = "email"
-	KeyGoogleProvider = "gp"
-	name              = "google"
+	fEmail = "email"
 )
 
 var (
 	// LoginRedirect A location the client will be sent after a successful callback.
 	LoginRedirect = "/"
-	// Log Set a logger, must be compatible with Kohirens stdlib/logger.
-	Log = &logger.Standard{}
 	// SignOutRedirect A location to send the client after they sign out.
 	SignOutRedirect = "/"
 )
 
 // AuthLink Build link to authenticate with Google.
-func AuthLink(w http.ResponseWriter, r *http.Request, app backend.App) {
+func AuthLink(w http.ResponseWriter, r *http.Request, app App) {
 	email, emailOK := validation.Email(r.URL.Query().Get(fEmail))
 	if !emailOK {
 		email = "" // It's not required, so it is O.K. to leave it out.
@@ -40,14 +33,13 @@ func AuthLink(w http.ResponseWriter, r *http.Request, app backend.App) {
 
 	p, e1 := app.ProviderManager().Get(KeyGoogleProvider)
 	if e1 != nil {
-		backend.HandleError(e1, w)
+		HandleError(e1, w)
 		return
 	}
-	gp := p.(sso.OIDCProvider)
 
-	authURI, e2 := gp.AuthLink(email)
+	authURI, e2 := p.AuthLink(email)
 	if e2 != nil {
-		backend.HandleError(e2, w)
+		HandleError(e2, w)
 		return
 	}
 
@@ -55,7 +47,7 @@ func AuthLink(w http.ResponseWriter, r *http.Request, app backend.App) {
 
 	_, e3 := w.Write([]byte(s))
 	if e3 != nil {
-		backend.HandleError(fmt.Errorf(stderr.EncodeJSON, e3.Error()), w)
+		HandleError(fmt.Errorf(stderr.EncodeJSON, e3.Error()), w)
 		return
 	}
 
@@ -64,16 +56,16 @@ func AuthLink(w http.ResponseWriter, r *http.Request, app backend.App) {
 }
 
 // SignIn Begin the authentication process for a client.
-func SignIn(w http.ResponseWriter, r *http.Request, app backend.App) {
+func SignIn(w http.ResponseWriter, r *http.Request, app App) {
 	if e := r.ParseForm(); e != nil {
-		backend.HandleError(fmt.Errorf(stderr.ParseSignInData, e.Error()), w)
+		HandleError(fmt.Errorf(stderr.ParseSignInData, e.Error()), w)
 		return
 	}
 
 	email := r.PostForm.Get(fEmail)
 	_, emailOK := validation.Email(email)
 	if email != "" && !emailOK {
-		backend.HandleError(backend.NewReferralError(
+		HandleError(backend.NewReferralError(
 			"",
 			stderr.ValidEmail,
 			"/?m=invalid-email",
@@ -85,14 +77,14 @@ func SignIn(w http.ResponseWriter, r *http.Request, app backend.App) {
 
 	p, e1 := app.ProviderManager().Get(KeyGoogleProvider)
 	if e1 != nil {
-		backend.HandleError(e1, w)
+		HandleError(e1, w)
 		return
 	}
 	gp := p.(sso.OIDCProvider)
 
 	authURI, e2 := gp.AuthLink(email)
 	if e2 != nil {
-		backend.HandleError(e2, w)
+		HandleError(e2, w)
 		return
 	}
 
@@ -103,12 +95,12 @@ func SignIn(w http.ResponseWriter, r *http.Request, app backend.App) {
 }
 
 // SignOut Invalidate a authentication token.
-func SignOut(w http.ResponseWriter, _ *http.Request, app backend.App) {
+func SignOut(w http.ResponseWriter, _ *http.Request, app App) {
 	endpoint := "/?signed-out=1"
 
 	p, e2 := app.ProviderManager().Get(KeyGoogleProvider)
 	if e2 != nil {
-		backend.HandleError(e2, w)
+		HandleError(e2, w)
 		return
 	}
 	gp := p.(sso.OIDCProvider)
@@ -120,7 +112,7 @@ func SignOut(w http.ResponseWriter, _ *http.Request, app backend.App) {
 	body := []byte(fmt.Sprintf(backend.MetaRefresh, endpoint))
 	_, e3 := w.Write(body)
 	if e3 != nil {
-		backend.HandleError(fmt.Errorf(stderr.WriteResponseBody, e3.Error()), w)
+		HandleError(fmt.Errorf(stderr.WriteResponseBody, e3.Error()), w)
 		return
 	}
 
@@ -131,13 +123,13 @@ func SignOut(w http.ResponseWriter, _ *http.Request, app backend.App) {
 
 // Callback Handles callback request initiated from a Google
 // authentication server when the client chose to sign in with Google.
-func Callback(w http.ResponseWriter, r *http.Request, app backend.App) {
+func Callback(w http.ResponseWriter, r *http.Request, app App) {
 	queryParams := r.URL.Query()
 	//userAgent := r.Header.Get("User-Agent")
 	pm := app.ProviderManager()
 
 	if e := pm.Callback(queryParams); e != nil {
-		backend.HandleError(e, w)
+		HandleError(e, w)
 		return
 	}
 
@@ -243,24 +235,4 @@ func Callback(w http.ResponseWriter, r *http.Request, app backend.App) {
 	// send user to a predetermined link or the dashboard.
 	w.Header().Set("Location", LoginRedirect)
 	w.WriteHeader(http.StatusSeeOther)
-}
-
-func getClientApp(store storage.Storage, r *http.Request, app backend.App) (*login.ClientApp, error) {
-	ec, e1 := backend.DecryptCookie(backend.EncryptedCookieName, r, app)
-	if e1 != nil {
-		return nil, e1
-	}
-
-	if ec != nil {
-		// TODO: Convert encrypted cookie to the proper object.
-		clientApp, err := login.LoadClientApp(string(ec.Value), store)
-		if err != nil {
-			Log.Errf("%v", err.Error())
-		}
-		if clientApp != nil {
-			return clientApp, nil
-		}
-	}
-
-	return nil, nil
 }

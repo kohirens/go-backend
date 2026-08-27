@@ -38,8 +38,14 @@ func TestNew(t *testing.T) {
 }
 
 type MockProvider struct {
-	user string
-	m    map[string]oidc.Provider
+	user                  string
+	m                     map[string]oidc.Provider
+	ExpectedAuthLink      string
+	ExpectedApp           string
+	ExpectedClientID      string
+	ExpectedEmail         string
+	ExpectedName          string
+	ExpectedAuthLinkError error
 }
 
 func (mp *MockProvider) Callback(params url.Values) error {
@@ -71,35 +77,6 @@ func (mp *MockProvider) Add(name string, provider oidc.Provider) {
 
 func (mp *MockProvider) Get(name string) (oidc.Provider, error) {
 	return mp.m[name], nil
-}
-func (mp *MockProvider) AuthLink(loginHint string) (string, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (mp *MockProvider) Name() string {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (mp *MockProvider) Application() string {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (mp *MockProvider) ClientEmail() string {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (mp *MockProvider) ClientID() string {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (mp *MockProvider) SignOut() error {
-	//TODO implement me
-	panic("implement me")
 }
 
 func xTestNewWithDefaults(t *testing.T) {
