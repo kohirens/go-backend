@@ -2,14 +2,16 @@ package google
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/kohirens/go-backend"
+	"github.com/kohirens/sso/oidc"
 	"github.com/kohirens/www/awslambda"
 	"github.com/kohirens/www/session"
 )
 
 type MockApp struct {
-	Authorizer backend.ProviderManager
+	Authorizer *backend.ProviderManager
 	name       string
 }
 
@@ -48,7 +50,7 @@ func (m *MockApp) AddService(key string, service interface{}) {
 	panic("implement me")
 }
 
-func (m *MockApp) ProviderManager() backend.ProviderManager {
+func (m *MockApp) ProviderManager() *backend.ProviderManager {
 	return m.Authorizer
 }
 
@@ -93,6 +95,21 @@ type MockProvider struct {
 	ExpectedEmail         string
 	ExpectedName          string
 	ExpectedAuthLinkError error
+}
+
+func (m *MockProvider) Callback(params url.Values) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockProvider) UserInfo() oidc.UserInfo {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockProvider) String() string {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (m *MockProvider) AuthLink(loginHint string) (string, error) {

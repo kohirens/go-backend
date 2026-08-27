@@ -3,7 +3,6 @@ package google
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/kohirens/go-backend"
 	"github.com/kohirens/go-login"
@@ -134,7 +133,7 @@ func SignOut(w http.ResponseWriter, _ *http.Request, app backend.App) {
 // authentication server when the client chose to sign in with Google.
 func Callback(w http.ResponseWriter, r *http.Request, app backend.App) {
 	queryParams := r.URL.Query()
-	userAgent := r.Header.Get("User-Agent")
+	//userAgent := r.Header.Get("User-Agent")
 	pm := app.ProviderManager()
 
 	if e := pm.Callback(queryParams); e != nil {
@@ -143,73 +142,53 @@ func Callback(w http.ResponseWriter, r *http.Request, app backend.App) {
 	}
 
 	// Get the storage manager so we can pull the account and profile.
-	storeX, e4 := app.ServiceManager().Get("store")
-	if e4 != nil {
-		backend.HandleError(e4, w)
-		return
-	}
-	store := storeX.(storage.Storage)
-
-	account, e1 := pm.RetrieveAccount(pm, store)
-	
-	// Load the client's profile.
+	//storeX, e4 := app.ServiceManager().Get("store")
+	//if e4 != nil {
+	//	backend.HandleError(e4, w)
+	//	return
+	//}
+	//store := storeX.(storage.Storage)
 
 	// Get and decrypt the clientApp data.
 	Log.Infof("%v", stdout.EncryptedCookie)
-	ec, e3 := backend.DecryptCookie(backend.EncryptedCookieName, r, app)
-	if e3 != nil {
-		Log.Warnf("%v", e3.Error())
-	}
-
-	// get client app or register a new one.
-	var clientApp *login.ClientApp
-	var err error
-	if ec != nil {
-		// TODO: Convert encrypted cookie to the proper object.
-		clientApp, err = login.LoadClientApp(string(ec.Value), store)
-	} else {
-		clientApp, err = login.RegisterClientApp(userAgent, gp, store)
-	}
-	if err != nil {
-		Log.Errf("%v", err.Error())
-		return
-	}
-
-	Log.Infof("%v", clientApp.LastActivity.UTC().Format(time.RFC3339))
+	//clientApp, e5 := getClientApp(store, r, app)
+	//if e5 != nil {
+	//	Log.Errf("%v", e5.Error())
+	//}
 
 	//var account *login.Account
-	//
-	//// Lookup the account in the cookie.
-	//if clientApp.AccountId != "" {
-	//	var err error
-	//	account, err = login.LoadAccount(clientApp.AccountId, store)
+	//var err error
+	//if clientApp != nil {
+	//	Log.Infof("%v", clientApp.LastActivity.UTC().Format(time.RFC3339))
+	//	// Lookup the account in the cookie.
+	//	accountLink, e1 := app.AccountManager.RetrieveAnAccount(clientApp.Provider.ClientID(), store)
 	//	if err != nil {
 	//		backend.HandleError(err, w)
 	//		return
 	//	}
 	//}
-	//
-	//// Make a new account if one does not exist.
+
+	// Make a new account if one does not exist.
 	//if account == nil {
-	//	login.NewAccount()
-	//	// TODO: Pull the profile.
-	//	// TODO: Update the cookie.
-	//	// TODO: Lookup the login.
-	//	profileId, e5 := login.LoadProfileMap(gp.ClientID(), store)
-	//	if e5 != nil {
-	//		backend.HandleError(e5, w)
-	//		return
-	//	}
-	//	// TODO: Lookup the profile.
-	//	profile, e6 := login.LoadProfile(profileId, store)
-	//	if e6 != nil {
-	//		backend.HandleError(e6, w)
-	//		return
-	//	}
-	//	Log.Dbugf("profile name: %v", profile.Name)
+	//	//	login.NewAccount()
+	//	//	// TODO: Pull the profile.
+	//	//	// TODO: Update the cookie.
+	//	//	// TODO: Lookup the login.
+	//	//	profileId, e5 := login.LoadProfileMap(gp.ClientID(), store)
+	//	//	if e5 != nil {
+	//	//		backend.HandleError(e5, w)
+	//	//		return
+	//	//	}
+	//	//	// TODO: Lookup the profile.
+	//	//	profile, e6 := login.LoadProfile(profileId, store)
+	//	//	if e6 != nil {
+	//	//		backend.HandleError(e6, w)
+	//	//		return
+	//	//	}
+	//	//	Log.Dbugf("profile name: %v", profile.Name)
 	//}
-	//
-	//// Retrieve the session manager.
+
+	// Retrieve the session manager.
 	//smX, e4 := app.Service(backend.KeySessionManager)
 	//if e4 != nil {
 	//	backend.HandleError(e4, w)
@@ -264,4 +243,24 @@ func Callback(w http.ResponseWriter, r *http.Request, app backend.App) {
 	// send user to a predetermined link or the dashboard.
 	w.Header().Set("Location", LoginRedirect)
 	w.WriteHeader(http.StatusSeeOther)
+}
+
+func getClientApp(store storage.Storage, r *http.Request, app backend.App) (*login.ClientApp, error) {
+	ec, e1 := backend.DecryptCookie(backend.EncryptedCookieName, r, app)
+	if e1 != nil {
+		return nil, e1
+	}
+
+	if ec != nil {
+		// TODO: Convert encrypted cookie to the proper object.
+		clientApp, err := login.LoadClientApp(string(ec.Value), store)
+		if err != nil {
+			Log.Errf("%v", err.Error())
+		}
+		if clientApp != nil {
+			return clientApp, nil
+		}
+	}
+
+	return nil, nil
 }

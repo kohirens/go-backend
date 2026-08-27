@@ -24,7 +24,7 @@ type App interface {
 	SessionManager() (*session.Manager, error)
 }
 
-// New A nNew initialized application instance.
+// New backend initialized instance.
 func New(
 	name string,
 	router RouteManager,
@@ -34,6 +34,7 @@ func New(
 	store storage.Storage,
 ) App {
 	return &Api{
+		accountManager:  NewAccountManager(store),
 		name:            name,
 		serviceManager:  serviceManager,
 		router:          router,

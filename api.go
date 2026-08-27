@@ -21,6 +21,7 @@ import (
 // these components are replaceable as long as the meet the interface
 // requirements.
 type Api struct {
+	accountManager  *AccountManager
 	providerManager *ProviderManager
 	capsule         *gpg.Capsule
 	gpgKey          *appKey
@@ -32,6 +33,10 @@ type Api struct {
 }
 
 var _ App = (*Api)(nil)
+
+func (a *Api) AccountManager() *AccountManager {
+	return a.accountManager
+}
 
 // AddProvider Wrapper method that adds an auth provider to the ProviderManager
 // for retrieval during request handling.
