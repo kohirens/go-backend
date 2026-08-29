@@ -7,7 +7,7 @@ import (
 
 	"github.com/kohirens/go-login"
 	"github.com/kohirens/sso/oidc"
-	"github.com/kohirens/www/storage"
+	"github.com/kohirens/storage"
 )
 
 func TestNew(t *testing.T) {

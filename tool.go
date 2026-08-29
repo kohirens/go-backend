@@ -4,28 +4,8 @@ import (
 	"net/http"
 
 	"github.com/kohirens/go-login"
-	"github.com/kohirens/www/storage"
+	"github.com/kohirens/storage"
 )
-
-func getClientApp(store storage.Storage, r *http.Request, app App) (*login.ClientApp, error) {
-	ec, e1 := DecryptCookie(EncryptedCookieName, r, app)
-	if e1 != nil {
-		return nil, e1
-	}
-
-	if ec != nil {
-		// TODO: Convert encrypted cookie to the proper object.
-		clientApp, err := login.LoadClientApp(string(ec.Value), store)
-		if err != nil {
-			Log.Errf("%v", err.Error())
-		}
-		if clientApp != nil {
-			return clientApp, nil
-		}
-	}
-
-	return nil, nil
-}
 
 func HandleError(err error, w http.ResponseWriter) {
 	switch e := err.(type) {
@@ -49,4 +29,31 @@ func HandleError(err error, w http.ResponseWriter) {
 		Log.Errf("%v", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+func buildFilename(m *Renderer, name string) string {
+	if len(m.location) > 0 && m.location[len(m.location)-1] != '/' {
+		return m.location + ps + name + "." + m.suffix
+	}
+	return m.location + name + "." + m.suffix
+}
+
+func getClientApp(store storage.Storage, r *http.Request, app App) (*login.ClientApp, error) {
+	ec, e1 := DecryptCookie(EncryptedCookieName, r, app)
+	if e1 != nil {
+		return nil, e1
+	}
+
+	if ec != nil {
+		// TODO: Convert encrypted cookie to the proper object.
+		clientApp, err := login.LoadClientApp(string(ec.Value), store)
+		if err != nil {
+			Log.Errf("%v", err.Error())
+		}
+		if clientApp != nil {
+			return clientApp, nil
+		}
+	}
+
+	return nil, nil
 }

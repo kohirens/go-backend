@@ -3,9 +3,9 @@ package backend
 import (
 	"net/http"
 
+	"github.com/kohirens/storage"
 	"github.com/kohirens/www/awslambda"
 	"github.com/kohirens/www/session"
-	"github.com/kohirens/www/storage"
 )
 
 type App interface {

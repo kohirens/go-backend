@@ -9,10 +9,10 @@ import (
 
 	"github.com/kohirens/sso"
 	"github.com/kohirens/sso/oidc"
+	"github.com/kohirens/storage"
 	"github.com/kohirens/www/awslambda"
 	"github.com/kohirens/www/gpg"
 	"github.com/kohirens/www/session"
-	"github.com/kohirens/www/storage"
 )
 
 // Api serves as the backend server for managing routes (a.k.a endpoints),

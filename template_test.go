@@ -6,7 +6,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/kohirens/www/storage"
+	"github.com/kohirens/storage"
 )
 
 func TestHandler_Render(t *testing.T) {

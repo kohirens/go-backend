@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/kohirens/stdlib/fsio"
-	"github.com/kohirens/www/storage"
+	"github.com/kohirens/storage"
 )
 
 func TestDecryptCookie(t *testing.T) {
